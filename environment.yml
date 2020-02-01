@@ -3,6 +3,7 @@ dependencies:
 - python=3
 - pylint
 - numpy
+- babel
 - pip
 - conda-forge::python-telegram-bot
 - pip:

@@ -1,0 +1,106 @@
+# Translations template for jokettttbot.
+# Copyright (C) 2020 ORGANIZATION
+# This file is distributed under the same license as the jokettttbot
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: jokettttbot 1.0.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2020-02-01 18:42+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: jokettttbot/jokettttbot.py:34
+msgid "jokettt telegram bot"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:35
+msgid "A telegram bot that plays Tic-tac-toe"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:41
+msgid "Commands"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:42
+msgid "/? - Print help informations"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:43
+msgid "/info - Print program informations"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:44
+msgid "/n - Start a new game"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:45
+msgid "How to play"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:46
+msgid "When its your turn, enter the move with the format:"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:47
+msgid "[R][C]"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:48
+msgid "where [R] is the row where to place the pawn, and [C] is the column"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:49
+msgid ""
+"Rows are A, B and C starting from top, and columns are 1, 2 and 3 "
+"starting from left."
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:50
+msgid "For example, enter 'A1' to place a pawn on upper left corner."
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:51
+msgid "After your move, I will do my move, and the board status will be printed."
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:52
+msgid "If the game is ended the result is printed"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:60
+msgid "--- New game. Awaiting you move ---"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:67
+msgid "your move: "
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:80
+msgid "I cannot understand the text: "
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:87
+msgid "my move: "
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:98
+msgid "You lose! :-D"
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:100
+msgid "You win!! :-("
+msgstr ""
+
+#: jokettttbot/jokettttbot.py:102
+msgid "Draw! ;-)"
+msgstr ""
+
