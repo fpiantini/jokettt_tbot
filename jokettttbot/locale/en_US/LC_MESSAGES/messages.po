@@ -1,4 +1,4 @@
-# Italian (Italy) translations for jokettttbot.
+# English (United States) translations for jokettttbot.
 # Copyright (C) 2020 ORGANIZATION
 # This file is distributed under the same license as the jokettttbot
 # project.
@@ -9,10 +9,10 @@ msgstr ""
 "Project-Id-Version: jokettttbot 1.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2020-02-02 14:57+0100\n"
-"PO-Revision-Date: 2020-02-01 16:36+0100\n"
+"PO-Revision-Date: 2020-02-02 10:03+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: it_IT\n"
-"Language-Team: it_IT <LL@li.org>\n"
+"Language: en_US\n"
+"Language-Team: en_US <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -25,31 +25,31 @@ msgstr "jokettt telegram bot"
 
 #: jokettttbot/jokettttbot.py:34
 msgid "A telegram bot that plays Tic-tac-toe"
-msgstr "Un bot telegram che gioca a Tris"
+msgstr "A telegram bot that plays Tic-tac-toe"
 
 #: jokettttbot/jokettttbot.py:42
 msgid "Commands"
-msgstr "Comandi"
+msgstr "Commands"
 
 #: jokettttbot/jokettttbot.py:43
 msgid "/help - Print help informations"
-msgstr "/help - Stampa queste info"
+msgstr "/help - Print help informations"
 
 #: jokettttbot/jokettttbot.py:44
 msgid "/info - Print program informations"
-msgstr "/info - Stampa informazioni sul programma"
+msgstr "/info - Print program informations"
 
 #: jokettttbot/jokettttbot.py:45
 msgid "/n - Start a new game"
-msgstr "/n - Inizia una nuova partita"
+msgstr "/n - Start a new game"
 
 #: jokettttbot/jokettttbot.py:46
 msgid "How to play"
-msgstr "Come giocare"
+msgstr "How to play"
 
 #: jokettttbot/jokettttbot.py:47
 msgid "When its your turn, enter the move with the format:"
-msgstr "Al tuo turno, scrivi la mossa usando il seguente formato:"
+msgstr "When its your turn, enter the move with the format:"
 
 #: jokettttbot/jokettttbot.py:48
 msgid "[R][C]"
@@ -57,72 +57,68 @@ msgstr "[R][C]"
 
 #: jokettttbot/jokettttbot.py:49
 msgid "where [R] is the row where to place the pawn, and [C] is the column"
-msgstr "dove [R] è la riga dove vuoi mettere la pedina, e [C] la colonna"
+msgstr "where [R] is the row where to place the pawn, and [C] is the column"
 
 #: jokettttbot/jokettttbot.py:50
 msgid ""
 "Rows are A, B and C starting from top, and columns are 1, 2 and 3 "
 "starting from left."
 msgstr ""
-"Le righe sono A, B e C partendo dall'alto, e le colonne sono 1, 2 e 3 "
-"partendo da sinistra"
+"Rows are A, B and C starting from top, and columns are 1, 2 and 3 "
+"starting from left."
 
 #: jokettttbot/jokettttbot.py:51
 msgid "For example, enter 'A1' to place a pawn on upper left corner."
-msgstr ""
-"Per esempio, scrivi 'A1' per mettere una pedina nell'angolo in alto a "
-"sinistra"
+msgstr "For example, enter 'A1' to place a pawn on upper left corner."
 
 #: jokettttbot/jokettttbot.py:52
 msgid "After your move, I will do my move, and the board status will be printed."
-msgstr ""
-"Dopo la tua mossa, io farò la mia e quindi lo stato della tastiera sarà "
-"stampato"
+msgstr "After your move, I will do my move, and the board status will be printed."
 
 #: jokettttbot/jokettttbot.py:53
 msgid "If the game is ended the result is printed"
-msgstr "Se la partita è terminata, stamperò il risultato"
+msgstr "If the game is ended the result is printed"
 
 #: jokettttbot/jokettttbot.py:62
 msgid "--- New game. Awaiting you move ---"
-msgstr "--- Nuova partita. Mossa a te ---"
+msgstr "--- New game. Awaiting you move ---"
 
 #: jokettttbot/jokettttbot.py:70
 msgid "Ok, I move"
-msgstr "Ok, muovo io"
+msgstr "Ok, I move"
 
 #: jokettttbot/jokettttbot.py:73 jokettttbot/jokettttbot.py:122
 msgid "Your move..."
-msgstr "Tocca a te..."
+msgstr "Your move: "
 
 #: jokettttbot/jokettttbot.py:76
 msgid "Game already started, cannot change order of players"
-msgstr "Partita già iniziata, non posso cambiare l'ordine dei giocatori"
+msgstr "Game already started, cannot change order of players"
 
 #: jokettttbot/jokettttbot.py:104
 msgid "Your move: "
-msgstr "La tua mossa: "
+msgstr "Your move: "
 
 #: jokettttbot/jokettttbot.py:128
 msgid "Invalid move: "
-msgstr "Mossa non valida: "
+msgstr "Invalid move: "
 
 #: jokettttbot/jokettttbot.py:139
 msgid "My move: "
-msgstr "La mia mossa: "
+msgstr "My move: "
 
 #: jokettttbot/jokettttbot.py:146
 msgid "You lose! :-D"
-msgstr "Hai perso! :-D"
+msgstr "You lose! :-D"
 
 #: jokettttbot/jokettttbot.py:148
 msgid "You win!! :-("
-msgstr "Hai vinto!! :-("
+msgstr "You win!! :-("
 
 #: jokettttbot/jokettttbot.py:150
 msgid "Draw! ;-)"
-msgstr "Patta! ;-)"
+msgstr "Draw! ;-)"
 
 #~ msgid "I cannot understand the text: "
-#~ msgstr "Non capisco il testo: "
+#~ msgstr "I cannot understand the text: "
 
