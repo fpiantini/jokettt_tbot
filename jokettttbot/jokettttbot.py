@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 import gettext
 import os
 
+from telegram import KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler
 from telegram.ext import MessageHandler, Filters
 import logging
@@ -18,40 +19,57 @@ HUMAN_PIECE = 'o'
 ALPHA_VALUE = 0.1
 DEFAULT_LANG = 'it_IT'
 
-###ldir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
-###lang_it = gettext.translation('messages', ldir, languages=['it_IT'], fallback=True)
-###_T = lang_it.gettext
+kb = [[KeyboardButton("A1"), KeyboardButton("A2"), KeyboardButton("A3")],
+      [KeyboardButton("B1"), KeyboardButton("B2"), KeyboardButton("B3")],
+      [KeyboardButton("C1"), KeyboardButton("C2"), KeyboardButton("C3")]]
+kb_markup = ReplyKeyboardMarkup(kb)
+
 
 # ********************************************************************************
 # COMMAND HANDLERS
 # ********************************************************************************
+def print_welcome_message(update, context):
+    check_userdata(context)
+    c_id = update.message.chat_id
+    user = update.message.from_user
+    print_bot_info(update, context)
+    context.bot.send_message(c_id,
+         context.user_data['lang'].gettext("Hello ") + user['username'] + "\n" +
+         context.user_data['lang'].gettext("Use keyboard to play, or digit /help for help"))
+
 # -----------------------------------------------------------------------
 def print_bot_info(update, context):
     check_userdata(context)
-    chat_id = update.message.chat_id
-    context.bot.send_message(chat_id,
+    c_id = update.message.chat_id
+    context.bot.send_message(c_id,
          "<b>" + context.user_data['lang'].gettext("jokettt telegram bot") + "</b>\n" +
-         context.user_data['lang'].gettext("A telegram bot that plays Tic-tac-toe"), parse_mode='HTML')
+         context.user_data['lang'].gettext("A telegram bot that plays Tic-tac-toe"),
+         parse_mode='HTML', reply_markup=kb_markup)
 
 # -----------------------------------------------------------------------
 def print_bot_help(update, context):
     check_userdata(context)
-    chat_id = update.message.chat_id
-    print_bot_info(update, context)
-    context.bot.send_message(chat_id,
+    c_id = update.message.chat_id
+    context.bot.send_message(c_id,
          "<b>" + context.user_data['lang'].gettext("Commands") + "</b>\n" +
          context.user_data['lang'].gettext("/help - Print help informations") + "\n" +
          context.user_data['lang'].gettext("/info - Print program informations") + "\n" +
+         context.user_data['lang'].gettext("/p - Print current board status") + "\n" +
          context.user_data['lang'].gettext("/n - Start a new game") + "\n" +
+         context.user_data['lang'].gettext("/m - Pass the move to the AI (only first move)") + "\n" +
+         context.user_data['lang'].gettext("/en - Change language to english") + "\n" +
+         context.user_data['lang'].gettext("/it - Imposta italiano") + "\n" +
          "<b>" + context.user_data['lang'].gettext("How to play") + "</b>\n" +
-         context.user_data['lang'].gettext("When its your turn, enter the move with the format:") + "\n" +
+         context.user_data['lang'].gettext("When its your turn, enter the move with the custom keyboard, or entering text with the following format:") + "\n" +
          "<b>" + context.user_data['lang'].gettext("[R][C]") + "</b>\n" +
-         context.user_data['lang'].gettext("where [R] is the row where to place the pawn, and [C] is the column") + "\n" +
+         context.user_data['lang'].gettext("where [R] is the row where to place the pawn, and [C] is the column.") + "\n" +
          context.user_data['lang'].gettext("Rows are A, B and C starting from top, and columns are 1, 2 and 3 starting from left.") + "\n" +
          context.user_data['lang'].gettext("For example, enter 'A1' to place a pawn on upper left corner.") + "\n" +
          context.user_data['lang'].gettext("After your move, I will do my move, and the board status will be printed.") + "\n" +
-         context.user_data['lang'].gettext("If the game is ended the result is printed"),
-         parse_mode='HTML')
+         context.user_data['lang'].gettext("If the game is ended the result is printed."),
+         parse_mode='HTML', reply_markup=kb_markup)
+
+    dispatcher.add_handler(CommandHandler('move', firstmove_to_ai))
 
 # -----------------------------------------------------------------------
 def newgame(update, context):
@@ -59,7 +77,8 @@ def newgame(update, context):
     c_id = update.message.chat_id
     logging.info(f'newgame() called. chat_id = {c_id}')
     context.user_data['board'].reset()
-    context.bot.send_message(c_id, context.user_data['lang'].gettext("--- New game. Awaiting you move ---"))
+    context.bot.send_message(c_id, context.user_data['lang'].gettext("--- New game. Awaiting you move ---"),
+                             reply_markup=kb_markup)
     print_user_board(context, c_id)
 
 # -----------------------------------------------------------------------
@@ -67,13 +86,16 @@ def firstmove_to_ai(update, context):
     check_userdata(context)
     c_id = update.message.chat_id
     if context.user_data['board'].is_empty():
-        context.bot.send_message(c_id, context.user_data['lang'].gettext("Ok, I move"))
+        context.bot.send_message(c_id, context.user_data['lang'].gettext("Ok, I move"),
+                                 reply_markup=kb_markup)
         _ = do_ai_move(context, c_id, AI_PIECE)
         print_user_board(context, c_id)
-        context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move..."))
+        context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move..."),
+                                 reply_markup=kb_markup)
     else:
         context.bot.send_message(c_id,
-            context.user_data['lang'].gettext("Game already started, cannot change order of players"))
+            context.user_data['lang'].gettext("Game already started, cannot change order of players"),
+                                 reply_markup=kb_markup)
 
 # -----------------------------------------------------------------------
 def print_status(update, context):
@@ -105,7 +127,8 @@ def parse_message(update, context):
 def parse_move_message(update, context):
     c_id = update.message.chat_id
     logging.info(f'parse_move_message() called. chat_id {c_id}')
-    context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move: ") + update.message.text.upper())
+    context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move: ") + update.message.text.upper(),
+                             reply_markup=kb_markup)
     _x, _y = context.user_data['board'].convert_movestring_to_indexes(update.message.text)
     _, _res = context.user_data['board'].place_pawn(_x, _y, HUMAN_PIECE)
     end_of_game = check_end_of_game(_res, context.user_data['board'])
@@ -123,14 +146,16 @@ def parse_move_message(update, context):
         print_result(context, c_id, _res)
         newgame(update, context)
     else:
-        context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move..."))
+        context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move..."),
+                                 reply_markup=kb_markup)
 
 # -----------------------------------------------------------------------
 def parse_nomove_message(update, context):
     c_id = update.message.chat_id
     context.bot.send_message(c_id,
             context.user_data['lang'].gettext("Invalid move: ") +
-            update.message.text)
+            update.message.text,
+            reply_markup=kb_markup)
 
 # ********************************************************************************
 # UTILITIES
@@ -141,7 +166,8 @@ def do_ai_move(ctx, c_id, ai_piece):
     _x, _y = ctx.user_data['ai'].move(ctx.user_data['board'])
     _, _res = ctx.user_data['board'].place_pawn(_x, _y, ai_piece)
     ctx.bot.send_message(c_id, ctx.user_data['lang'].gettext("My move: ") +
-                         ctx.user_data['board'].convert_move_to_movestring([_x, _y]))
+                         ctx.user_data['board'].convert_move_to_movestring([_x, _y]),
+                         reply_markup=kb_markup)
     return -_res;
 
 # -----------------------------------------------------------------------
@@ -152,13 +178,15 @@ def print_result(ctx, c_id, res):
         msg = ctx.user_data['lang'].gettext("You win!! :-(")
     else:
         msg = ctx.user_data['lang'].gettext("Draw! ;-)")
-    ctx.bot.send_message(c_id, msg)
+    ctx.bot.send_message(c_id, msg,
+                         reply_markup=kb_markup)
 
 # -----------------------------------------------------------------------
 def print_user_board(ctx, c_id):
     ctx.bot.send_message(c_id, "```\n" +
                          str(ctx.user_data['board']) + "```",
-                         parse_mode='Markdown')
+                         parse_mode='Markdown',
+                         reply_markup=kb_markup)
 
 # -----------------------------------------------------------------------
 def check_end_of_game(res, brd):
@@ -171,7 +199,7 @@ def check_userdata(ctx):
     if 'board' not in ctx.user_data:
         # no board... this means that this
         # is the first time we see this user
-        logging.info(f'initializing new user. chat_id = {c_id}')
+        logging.info(f'initializing new user')
         create_board_for_user(ctx)
         create_ai_for_user(ctx)
         set_lang_for_user(ctx, DEFAULT_LANG)
@@ -209,10 +237,10 @@ def main():
     updater = Updater(args.telegram_api_key, use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('info', print_bot_info))
-    dispatcher.add_handler(CommandHandler('start', print_bot_help))
+    dispatcher.add_handler(CommandHandler('start', print_welcome_message))
     dispatcher.add_handler(CommandHandler('help', print_bot_help))
     dispatcher.add_handler(CommandHandler('n', newgame))
-    dispatcher.add_handler(CommandHandler('move', firstmove_to_ai))
+    dispatcher.add_handler(CommandHandler('m', firstmove_to_ai))
     dispatcher.add_handler(CommandHandler('p', print_status))
     dispatcher.add_handler(CommandHandler('en', lang_setenglish))
     dispatcher.add_handler(CommandHandler('it', lang_setitalian))
