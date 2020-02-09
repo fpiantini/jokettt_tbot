@@ -4,6 +4,9 @@ from argparse import ArgumentParser
 import gettext
 import os
 
+import numpy as np
+
+
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler
 from telegram.ext import MessageHandler, Filters
@@ -24,14 +27,15 @@ kb = [[KeyboardButton("A1"), KeyboardButton("A2"), KeyboardButton("A3")],
       [KeyboardButton("C1"), KeyboardButton("C2"), KeyboardButton("C3")]]
 kb_markup = ReplyKeyboardMarkup(kb)
 
+START_LFILE = 'ldata/l1000.npz'
 
 # ********************************************************************************
 # COMMAND HANDLERS
 # ********************************************************************************
 def print_welcome_message(update, context):
-    check_userdata(context)
-    c_id = update.message.chat_id
     user = update.message.from_user
+    check_userdata(context, user)
+    c_id = update.message.chat_id
     print_bot_info(update, context)
     context.bot.send_message(c_id,
          context.user_data['lang'].gettext("Hello ") + user['username'] + "\n" +
@@ -39,7 +43,7 @@ def print_welcome_message(update, context):
 
 # -----------------------------------------------------------------------
 def print_bot_info(update, context):
-    check_userdata(context)
+    check_userdata(context, update.message.from_user)
     c_id = update.message.chat_id
     context.bot.send_message(c_id,
          "<b>" + context.user_data['lang'].gettext("jokettt telegram bot") + "</b>\n" +
@@ -48,7 +52,7 @@ def print_bot_info(update, context):
 
 # -----------------------------------------------------------------------
 def print_bot_help(update, context):
-    check_userdata(context)
+    check_userdata(context, update.message.from_user)
     c_id = update.message.chat_id
     context.bot.send_message(c_id,
          "<b>" + context.user_data['lang'].gettext("Commands") + "</b>\n" +
@@ -57,6 +61,8 @@ def print_bot_help(update, context):
          context.user_data['lang'].gettext("/p - Print current board status") + "\n" +
          context.user_data['lang'].gettext("/n - Start a new game") + "\n" +
          context.user_data['lang'].gettext("/m - Pass the move to the AI (only first move)") + "\n" +
+         context.user_data['lang'].gettext("/minimax - Set the AI to minimax and restart game") + "\n" +
+         context.user_data['lang'].gettext("/learner - Set the AI to learner and restart game") + "\n" +
          context.user_data['lang'].gettext("/en - Change language to english") + "\n" +
          context.user_data['lang'].gettext("/it - Imposta italiano") + "\n" +
          "<b>" + context.user_data['lang'].gettext("How to play") + "</b>\n" +
@@ -73,7 +79,7 @@ def print_bot_help(update, context):
 
 # -----------------------------------------------------------------------
 def newgame(update, context):
-    check_userdata(context)
+    check_userdata(context, update.message.from_user)
     c_id = update.message.chat_id
     logging.info(f'newgame() called. chat_id = {c_id}')
     context.user_data['board'].reset()
@@ -83,7 +89,7 @@ def newgame(update, context):
 
 # -----------------------------------------------------------------------
 def firstmove_to_ai(update, context):
-    check_userdata(context)
+    check_userdata(context, update.message.from_user)
     c_id = update.message.chat_id
     if context.user_data['board'].is_empty():
         context.bot.send_message(c_id, context.user_data['lang'].gettext("Ok, I move"),
@@ -99,8 +105,20 @@ def firstmove_to_ai(update, context):
 
 # -----------------------------------------------------------------------
 def print_status(update, context):
-    check_userdata(context)
+    check_userdata(context, update.message.from_user)
     print_user_board(context, update.message.chat_id)
+
+# -----------------------------------------------------------------------
+def set_ai_to_minimax(update, context):
+    check_userdata(context, update.message.from_user)
+    create_ai_for_user(context, 'minimax')
+    newgame(update, context)
+
+# -----------------------------------------------------------------------
+def set_ai_to_learner(update, context):
+    check_userdata(context, update.message.from_user)
+    create_ai_for_user(context, 'learner')
+    newgame(update, context)
 
 # -----------------------------------------------------------------------
 def lang_setitalian(update, context):
@@ -117,7 +135,7 @@ def lang_setenglish(update, context):
 
 # -----------------------------------------------------------------------
 def parse_message(update, context):
-    check_userdata(context)
+    check_userdata(context, update.message.from_user)
     if context.user_data['board'].is_valid_move(update.message.text):
         parse_move_message(update, context)
     else:
@@ -144,6 +162,14 @@ def parse_move_message(update, context):
     if end_of_game:
         # if game terminated print result and start a new one
         print_result(context, c_id, _res)
+        # if learner player, learn from defeat if necessary, then saves learned data
+        if isinstance(context.user_data['ai'], LearnerPlayer):
+            if _res > 0:
+                context.user_data['ai'].learn_from_defeat(context.user_data['board'])
+            np.savez(context.user_data['lfile'],
+                     zobrist_hash = context.user_data['board'].zhash_table,
+                     value_tuple = context.user_data['ai'].values)
+        # starts a new game
         newgame(update, context)
     else:
         context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move..."),
@@ -195,23 +221,46 @@ def check_end_of_game(res, brd):
     return False
 
 # -----------------------------------------------------------------------
-def check_userdata(ctx):
+def check_userdata(ctx, user):
     if 'board' not in ctx.user_data:
         # no board... this means that this
         # is the first time we see this user
         logging.info(f'initializing new user')
+        init_learner_data_for_user(ctx, user)
         create_board_for_user(ctx)
-        create_ai_for_user(ctx)
+        create_ai_for_user(ctx, 'minimax')
         set_lang_for_user(ctx, DEFAULT_LANG)
 
 
 # -----------------------------------------------------------------------
-def create_board_for_user(ctx):
-    ctx.user_data['board'] = Board('x', 'o')
+def init_learner_data_for_user(ctx, user):
+    # if user-specific learned data exists, load them
+    # otherwise starts with l1000 data
+    ctx.user_data['lfile'] = f"ldata/{user['username']}_ldata"
+    try:
+        logging.info(f"try to load specific learned data for player {user['username']} from file {ctx.user_data['lfile']}.npz")
+        init_data = np.load(f"{ctx.user_data['lfile']}.npz", allow_pickle=True)
+        logging.info(f"loaded init learned data from {ctx.user_data['lfile']}.npz")
+    except:
+        init_data = np.load(START_LFILE, allow_pickle=True)
+        logging.info(f"loaded init learned data from {START_LFILE}")
+    ctx.user_data['init_ztable'] = init_data['zobrist_hash']
+    ctx.user_data['init_values'] = init_data['value_tuple'].item()
 
 # -----------------------------------------------------------------------
-def create_ai_for_user(ctx):
-    ctx.user_data['ai'] = MinimaxPlayer(AI_PIECE, False)
+def create_board_for_user(ctx):
+    ctx.user_data['board'] = Board('x', 'o', ctx.user_data['init_ztable'])
+
+# -----------------------------------------------------------------------
+def create_ai_for_user(ctx, mode):
+    if mode == 'minimax':
+        ctx.user_data['ai'] = MinimaxPlayer(AI_PIECE)
+    elif mode == 'learner':
+        ctx.user_data['ai'] = LearnerPlayer(AI_PIECE,
+                  ctx.user_data['board'], ctx.user_data['init_values'])
+    else:
+        #default is minimax
+        ctx.user_data['ai'] = MinimaxPlayer(AI_PIECE)
 
 # -----------------------------------------------------------------------
 def set_lang_for_user(ctx, lng_str):
@@ -234,6 +283,9 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
 
+
+    # load data to be used for learner players
+
     updater = Updater(args.telegram_api_key, use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('info', print_bot_info))
@@ -242,6 +294,8 @@ def main():
     dispatcher.add_handler(CommandHandler('n', newgame))
     dispatcher.add_handler(CommandHandler('m', firstmove_to_ai))
     dispatcher.add_handler(CommandHandler('p', print_status))
+    dispatcher.add_handler(CommandHandler('minimax', set_ai_to_minimax))
+    dispatcher.add_handler(CommandHandler('learner', set_ai_to_learner))
     dispatcher.add_handler(CommandHandler('en', lang_setenglish))
     dispatcher.add_handler(CommandHandler('it', lang_setitalian))
 

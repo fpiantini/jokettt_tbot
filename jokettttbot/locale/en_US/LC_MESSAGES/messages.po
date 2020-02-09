@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: jokettttbot 1.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-02-02 16:18+0100\n"
+"POT-Creation-Date: 2020-02-09 22:52+0100\n"
 "PO-Revision-Date: 2020-02-02 10:03+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
@@ -19,59 +19,67 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: jokettttbot/jokettttbot.py:37
+#: jokettttbot/jokettttbot.py:41
 msgid "Hello "
 msgstr "Hello"
 
-#: jokettttbot/jokettttbot.py:38
+#: jokettttbot/jokettttbot.py:42
 msgid "Use keyboard to play, or digit /help for help"
 msgstr "Use keyboard to play, or digit /help for help"
 
-#: jokettttbot/jokettttbot.py:45
+#: jokettttbot/jokettttbot.py:49
 msgid "jokettt telegram bot"
 msgstr "jokettt telegram bot"
 
-#: jokettttbot/jokettttbot.py:46
+#: jokettttbot/jokettttbot.py:50
 msgid "A telegram bot that plays Tic-tac-toe"
 msgstr "A telegram bot that plays Tic-tac-toe"
 
-#: jokettttbot/jokettttbot.py:54
+#: jokettttbot/jokettttbot.py:58
 msgid "Commands"
 msgstr "Commands"
 
-#: jokettttbot/jokettttbot.py:55
+#: jokettttbot/jokettttbot.py:59
 msgid "/help - Print help informations"
 msgstr "/help - Print help informations"
 
-#: jokettttbot/jokettttbot.py:56
+#: jokettttbot/jokettttbot.py:60
 msgid "/info - Print program informations"
 msgstr "/info - Print program informations"
 
-#: jokettttbot/jokettttbot.py:57
+#: jokettttbot/jokettttbot.py:61
 msgid "/p - Print current board status"
 msgstr "/p - Print current board status"
 
-#: jokettttbot/jokettttbot.py:58
+#: jokettttbot/jokettttbot.py:62
 msgid "/n - Start a new game"
 msgstr "/n - Start a new game"
 
-#: jokettttbot/jokettttbot.py:59
+#: jokettttbot/jokettttbot.py:63
 msgid "/m - Pass the move to the AI (only first move)"
 msgstr "/m - Pass the move to the AI (only first move)"
 
-#: jokettttbot/jokettttbot.py:60
+#: jokettttbot/jokettttbot.py:64
+msgid "/minimax - Set the AI to minimax and restart game"
+msgstr "/minimax - Set the AI to minimax and restart game"
+
+#: jokettttbot/jokettttbot.py:65
+msgid "/learner - Set the AI to learner and restart game"
+msgstr "/learner - Set the AI to learner and restart game"
+
+#: jokettttbot/jokettttbot.py:66
 msgid "/en - Change language to english"
 msgstr "/en - Change language to english"
 
-#: jokettttbot/jokettttbot.py:61
+#: jokettttbot/jokettttbot.py:67
 msgid "/it - Imposta italiano"
 msgstr "/it - Imposta italiano"
 
-#: jokettttbot/jokettttbot.py:62
+#: jokettttbot/jokettttbot.py:68
 msgid "How to play"
 msgstr "How to play"
 
-#: jokettttbot/jokettttbot.py:63
+#: jokettttbot/jokettttbot.py:69
 msgid ""
 "When its your turn, enter the move with the custom keyboard, or entering "
 "text with the following format:"
@@ -79,15 +87,15 @@ msgstr ""
 "When its your turn, enter the move with the custom keyboard, or entering "
 "text with the following format:"
 
-#: jokettttbot/jokettttbot.py:64
+#: jokettttbot/jokettttbot.py:70
 msgid "[R][C]"
 msgstr "[R][C]"
 
-#: jokettttbot/jokettttbot.py:65
+#: jokettttbot/jokettttbot.py:71
 msgid "where [R] is the row where to place the pawn, and [C] is the column."
 msgstr "where [R] is the row where to place the pawn, and [C] is the column."
 
-#: jokettttbot/jokettttbot.py:66
+#: jokettttbot/jokettttbot.py:72
 msgid ""
 "Rows are A, B and C starting from top, and columns are 1, 2 and 3 "
 "starting from left."
@@ -95,55 +103,55 @@ msgstr ""
 "Rows are A, B and C starting from top, and columns are 1, 2 and 3 "
 "starting from left."
 
-#: jokettttbot/jokettttbot.py:67
+#: jokettttbot/jokettttbot.py:73
 msgid "For example, enter 'A1' to place a pawn on upper left corner."
 msgstr "For example, enter 'A1' to place a pawn on upper left corner."
 
-#: jokettttbot/jokettttbot.py:68
+#: jokettttbot/jokettttbot.py:74
 msgid "After your move, I will do my move, and the board status will be printed."
 msgstr "After your move, I will do my move, and the board status will be printed."
 
-#: jokettttbot/jokettttbot.py:69
+#: jokettttbot/jokettttbot.py:75
 msgid "If the game is ended the result is printed."
 msgstr "If the game is ended the result is printed."
 
-#: jokettttbot/jokettttbot.py:80
+#: jokettttbot/jokettttbot.py:86
 msgid "--- New game. Awaiting you move ---"
 msgstr "--- New game. Awaiting you move ---"
 
-#: jokettttbot/jokettttbot.py:89
+#: jokettttbot/jokettttbot.py:95
 msgid "Ok, I move"
 msgstr "Ok, I move"
 
-#: jokettttbot/jokettttbot.py:93 jokettttbot/jokettttbot.py:149
+#: jokettttbot/jokettttbot.py:99 jokettttbot/jokettttbot.py:175
 msgid "Your move..."
 msgstr "Your move: "
 
-#: jokettttbot/jokettttbot.py:97
+#: jokettttbot/jokettttbot.py:103
 msgid "Game already started, cannot change order of players"
 msgstr "Game already started, cannot change order of players"
 
-#: jokettttbot/jokettttbot.py:130
+#: jokettttbot/jokettttbot.py:148
 msgid "Your move: "
 msgstr "Your move: "
 
-#: jokettttbot/jokettttbot.py:156
+#: jokettttbot/jokettttbot.py:182
 msgid "Invalid move: "
 msgstr "Invalid move: "
 
-#: jokettttbot/jokettttbot.py:168
+#: jokettttbot/jokettttbot.py:194
 msgid "My move: "
 msgstr "My move: "
 
-#: jokettttbot/jokettttbot.py:176
+#: jokettttbot/jokettttbot.py:202
 msgid "You lose! :-D"
 msgstr "You lose! :-D"
 
-#: jokettttbot/jokettttbot.py:178
+#: jokettttbot/jokettttbot.py:204
 msgid "You win!! :-("
 msgstr "You win!! :-("
 
-#: jokettttbot/jokettttbot.py:180
+#: jokettttbot/jokettttbot.py:206
 msgid "Draw! ;-)"
 msgstr "Draw! ;-)"
 
