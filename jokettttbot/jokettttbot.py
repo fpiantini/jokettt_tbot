@@ -75,7 +75,6 @@ def print_bot_help(update, context):
          context.user_data['lang'].gettext("If the game is ended the result is printed."),
          parse_mode='HTML', reply_markup=kb_markup)
 
-    dispatcher.add_handler(CommandHandler('move', firstmove_to_ai))
 
 # -----------------------------------------------------------------------
 def newgame(update, context):
@@ -298,6 +297,7 @@ def main():
     dispatcher.add_handler(CommandHandler('learner', set_ai_to_learner))
     dispatcher.add_handler(CommandHandler('en', lang_setenglish))
     dispatcher.add_handler(CommandHandler('it', lang_setitalian))
+    dispatcher.add_handler(CommandHandler('move', firstmove_to_ai))
 
     dispatcher.add_handler(MessageHandler(Filters.text, parse_message))
     updater.start_polling()
