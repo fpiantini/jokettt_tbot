@@ -2,6 +2,7 @@
 #
 from argparse import ArgumentParser
 import gettext
+import sys
 import os
 
 import numpy as np
@@ -21,13 +22,17 @@ AI_PIECE = 'x'
 HUMAN_PIECE = 'o'
 ALPHA_VALUE = 0.1
 DEFAULT_LANG = 'it_IT'
+DEFAULT_AI_MODE = 'learner'
 
 kb = [[KeyboardButton("A1"), KeyboardButton("A2"), KeyboardButton("A3")],
       [KeyboardButton("B1"), KeyboardButton("B2"), KeyboardButton("B3")],
       [KeyboardButton("C1"), KeyboardButton("C2"), KeyboardButton("C3")]]
 kb_markup = ReplyKeyboardMarkup(kb)
 
-START_LFILE = 'ldata/l1000.npz'
+parser = ArgumentParser()
+global_args = False
+
+START_LFILE = 'ldata/ldata.npz'
 
 # ********************************************************************************
 # COMMAND HANDLERS
@@ -82,8 +87,16 @@ def newgame(update, context):
     c_id = update.message.chat_id
     logging.info(f'newgame() called. chat_id = {c_id}')
     context.user_data['board'].reset()
-    context.bot.send_message(c_id, context.user_data['lang'].gettext("--- New game. Awaiting you move ---"),
+    if context.user_data['move_to_ai']:
+        context.bot.send_message(c_id, context.user_data['lang'].gettext("--- New game. My move ---"),
                              reply_markup=kb_markup)
+    else:
+        context.bot.send_message(c_id, context.user_data['lang'].gettext("--- New game. Awaiting you move ---"),
+                             reply_markup=kb_markup)
+    if context.user_data['switch_turn']:
+        if context.user_data['move_to_ai']:
+            _ = do_ai_move(context, c_id, AI_PIECE)
+
     print_user_board(context, c_id)
 
 # -----------------------------------------------------------------------
@@ -110,13 +123,13 @@ def print_status(update, context):
 # -----------------------------------------------------------------------
 def set_ai_to_minimax(update, context):
     check_userdata(context, update.message.from_user)
-    create_ai_for_user(context, 'minimax')
+    create_ai_for_user(context, 'minimax', update.message.from_user)
     newgame(update, context)
 
 # -----------------------------------------------------------------------
 def set_ai_to_learner(update, context):
     check_userdata(context, update.message.from_user)
-    create_ai_for_user(context, 'learner')
+    create_ai_for_user(context, 'learner', update.message.from_user)
     newgame(update, context)
 
 # -----------------------------------------------------------------------
@@ -142,6 +155,7 @@ def parse_message(update, context):
 
 # -----------------------------------------------------------------------
 def parse_move_message(update, context):
+    user = update.message.from_user['username']
     c_id = update.message.chat_id
     logging.info(f'parse_move_message() called. chat_id {c_id}')
     context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move: ") + update.message.text.upper(),
@@ -159,16 +173,20 @@ def parse_move_message(update, context):
         print_user_board(context, c_id)
 
     if end_of_game:
+        logging.info(f"Game terminated. User = {user}, chat ID = {c_id}")
         # if game terminated print result and start a new one
         print_result(context, c_id, _res)
         # if learner player, learn from defeat if necessary, then saves learned data
         if isinstance(context.user_data['ai'], LearnerPlayer):
             if _res > 0:
                 context.user_data['ai'].learn_from_defeat(context.user_data['board'])
+            logging.info(f"Saving updated user {user} learned data to {context.user_data['lfile']}")
             np.savez(context.user_data['lfile'],
                      zobrist_hash = context.user_data['board'].zhash_table,
                      value_tuple = context.user_data['ai'].values)
         # starts a new game
+        if context.user_data['switch_turn']:
+            context.user_data['move_to_ai'] = not context.user_data['move_to_ai']
         newgame(update, context)
     else:
         context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move..."),
@@ -221,13 +239,14 @@ def check_end_of_game(res, brd):
 
 # -----------------------------------------------------------------------
 def check_userdata(ctx, user):
+    global global_args
     if 'board' not in ctx.user_data:
         # no board... this means that this
         # is the first time we see this user
-        logging.info(f'initializing new user')
+        logging.info(f'initializing new user - switch turn mode = {global_args}')
         init_learner_data_for_user(ctx, user)
         create_board_for_user(ctx)
-        create_ai_for_user(ctx, 'minimax')
+        create_ai_for_user(ctx, DEFAULT_AI_MODE, user, global_args)
         set_lang_for_user(ctx, DEFAULT_LANG)
 
 
@@ -251,15 +270,21 @@ def create_board_for_user(ctx):
     ctx.user_data['board'] = Board('x', 'o', ctx.user_data['init_ztable'])
 
 # -----------------------------------------------------------------------
-def create_ai_for_user(ctx, mode):
+def create_ai_for_user(ctx, mode, user, switch_turn):
     if mode == 'minimax':
+        logging.info(f"Instatiating minimax AI for user {user['username']} - Switch turn mode = {switch_turn}")
         ctx.user_data['ai'] = MinimaxPlayer(AI_PIECE)
     elif mode == 'learner':
+        logging.info(f"Instatiating learner AI for user {user['username']} - Switch turn mode = {switch_turn}")
         ctx.user_data['ai'] = LearnerPlayer(AI_PIECE,
                   ctx.user_data['board'], ctx.user_data['init_values'])
     else:
         #default is minimax
+        logging.info(f"Instatiating minimax AI for user {user['username']} - Switch turn mode = {switch_turn}")
         ctx.user_data['ai'] = MinimaxPlayer(AI_PIECE)
+
+    ctx.user_data['switch_turn'] = switch_turn
+    ctx.user_data['move_to_ai'] = False
 
 # -----------------------------------------------------------------------
 def set_lang_for_user(ctx, lng_str):
@@ -275,17 +300,29 @@ def main():
 
     # --------------------------------------------------
     # 1. PARSE COMMAND LINE ARGUMENTS
-    parser = ArgumentParser()
-    parser.add_argument("telegram_api_key", help="telegram HTTP API token")
+    parser.add_argument("-k", "--apikey", help="telegram HTTP API token")
+    parser.add_argument("-l", "--logfile", help="absolute path of the logfile")
+    parser.add_argument("-s", "--switch_turn", action="store_true",
+                        help="swith first move between players")
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        level=logging.INFO)
+    if not args.apikey:
+        print("FATAL ERROR: Telegram API key shall be specified")
+        sys.exit(1)
 
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    if args.logfile:
+        logging.basicConfig(format=log_format, level=logging.INFO,
+                            filename=args.logfile, filemode='a')
+    else:
+        logging.basicConfig(format=log_format, level=logging.INFO)
 
-    # load data to be used for learner players
+    logging.info(f"Jokettt Telegram Bot using Jokettt engine started")
+    global global_args
+    global_args = args.switch_turn
+    logging.info(f"Switch turn mode = {global_args}")
 
-    updater = Updater(args.telegram_api_key, use_context=True)
+    updater = Updater(args.apikey, use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('info', print_bot_info))
     dispatcher.add_handler(CommandHandler('start', print_welcome_message))
