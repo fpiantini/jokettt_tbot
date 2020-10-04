@@ -43,7 +43,7 @@ def print_welcome_message(update, context):
     c_id = update.message.chat_id
     print_bot_info(update, context)
     context.bot.send_message(c_id,
-         context.user_data['lang'].gettext("Hello ") + user['username'] + "\n" +
+         context.user_data['lang'].gettext("Hello ") + user['first_name'] + "\n" +
          context.user_data['lang'].gettext("Use keyboard to play, or digit /help for help"))
 
 # -----------------------------------------------------------------------
@@ -155,7 +155,7 @@ def parse_message(update, context):
 
 # -----------------------------------------------------------------------
 def parse_move_message(update, context):
-    user = update.message.from_user['username']
+    user_id = update.message.from_user['id']
     c_id = update.message.chat_id
     logging.info(f'parse_move_message() called. chat_id {c_id}')
     context.bot.send_message(c_id, context.user_data['lang'].gettext("Your move: ") + update.message.text.upper(),
@@ -173,14 +173,14 @@ def parse_move_message(update, context):
         print_user_board(context, c_id)
 
     if end_of_game:
-        logging.info(f"Game terminated. User = {user}, chat ID = {c_id}")
+        logging.info(f"Game terminated. User ID = {user_id}, chat ID = {c_id}")
         # if game terminated print result and start a new one
         print_result(context, c_id, _res)
         # if learner player, learn from defeat if necessary, then saves learned data
         if isinstance(context.user_data['ai'], LearnerPlayer):
             if _res > 0:
                 context.user_data['ai'].learn_from_defeat(context.user_data['board'])
-            logging.info(f"Saving updated user {user} learned data to {context.user_data['lfile']}")
+            logging.info(f"Saving updated for user with ID {user_id} learned data to {context.user_data['lfile']}")
             np.savez(context.user_data['lfile'],
                      zobrist_hash = context.user_data['board'].zhash_table,
                      value_tuple = context.user_data['ai'].values)
@@ -254,9 +254,9 @@ def check_userdata(ctx, user):
 def init_learner_data_for_user(ctx, user):
     # if user-specific learned data exists, load them
     # otherwise starts with l1000 data
-    ctx.user_data['lfile'] = f"ldata/{user['username']}_ldata"
+    ctx.user_data['lfile'] = f"ldata/{user['id']}_ldata"
     try:
-        logging.info(f"try to load specific learned data for player {user['username']} from file {ctx.user_data['lfile']}.npz")
+        logging.info(f"try to load specific learned data for user with ID {user['id']} from file {ctx.user_data['lfile']}.npz")
         init_data = np.load(f"{ctx.user_data['lfile']}.npz", allow_pickle=True)
         logging.info(f"loaded init learned data from {ctx.user_data['lfile']}.npz")
     except:
@@ -272,15 +272,15 @@ def create_board_for_user(ctx):
 # -----------------------------------------------------------------------
 def create_ai_for_user(ctx, mode, user, switch_turn):
     if mode == 'minimax':
-        logging.info(f"Instatiating minimax AI for user {user['username']} - Switch turn mode = {switch_turn}")
+        logging.info(f"Instatiating minimax AI for user with ID {user['id']} - Switch turn mode = {switch_turn}")
         ctx.user_data['ai'] = MinimaxPlayer(AI_PIECE)
     elif mode == 'learner':
-        logging.info(f"Instatiating learner AI for user {user['username']} - Switch turn mode = {switch_turn}")
+        logging.info(f"Instatiating learner AI for user with ID {user['id']} - Switch turn mode = {switch_turn}")
         ctx.user_data['ai'] = LearnerPlayer(AI_PIECE,
                   ctx.user_data['board'], ctx.user_data['init_values'])
     else:
         #default is minimax
-        logging.info(f"Instatiating minimax AI for user {user['username']} - Switch turn mode = {switch_turn}")
+        logging.info(f"Instatiating minimax AI for user with ID {user['id']} - Switch turn mode = {switch_turn}")
         ctx.user_data['ai'] = MinimaxPlayer(AI_PIECE)
 
     ctx.user_data['switch_turn'] = switch_turn
